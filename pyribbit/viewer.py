@@ -3,6 +3,7 @@
 import copy
 import os
 import sys
+import threading
 from threading import Thread, RLock
 import time
 
@@ -33,6 +34,17 @@ from .mesh import Mesh
 import pyglet
 from pyglet import clock
 pyglet.options['shadow_window'] = False
+
+
+def _check_viewer_thread(run_in_thread=False):
+    if sys.platform == 'darwin' and (
+            run_in_thread or
+            threading.current_thread() is not threading.main_thread()):
+        raise RuntimeError(
+            'macOS viewers must run on the main thread. '
+            'Use run_in_thread=False and schedule scene updates with '
+            'pyglet.clock.schedule_interval.'
+        )
 
 
 class Viewer(pyglet.window.Window):
@@ -168,8 +180,10 @@ class Viewer(pyglet.window.Window):
     Note
     ----
     Animation can be accomplished by running the viewer with ``run_in_thread``
-    enabled. Then, just run a loop in your main thread, updating the scene as
-    needed. Before updating the scene, be sure to acquire the
+    enabled on Linux and Windows. On macOS, keep the viewer on the main
+    thread and schedule updates with ``pyglet.clock.schedule_interval``.
+    For a threaded viewer, run a loop in your main thread, updating the scene
+    as needed. Before updating the scene, be sure to acquire the
     :attr:`.Viewer.render_lock`, and release it  when your update is done.
     """
 
@@ -178,6 +192,7 @@ class Viewer(pyglet.window.Window):
                  registered_keys=None, run_in_thread=False,
                  auto_start=True,
                  **kwargs):
+        _check_viewer_thread(run_in_thread)
 
         #######################################################################
         # Save attributes and flags
@@ -996,6 +1011,7 @@ class Viewer(pyglet.window.Window):
         self._renderer.render(self.scene, flags)
 
     def _init_and_start_app(self):
+        _check_viewer_thread()
         # Try multiple configs starting with target OpenGL version
         # and multisampling and removing these options if exception
         # Note: multisampling not available on all hardware

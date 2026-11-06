@@ -22,10 +22,31 @@ documentation.
 
 .. image:: /_static/rotation.gif
 
+Animating on the Main Thread
+----------------------------
+On macOS, window creation and the event loop must run on the main thread.
+Schedule scene updates on pyglet's clock instead of starting a background
+viewer. This approach also works on Linux and Windows:
+
+>>> from pyglet import clock
+>>> v = pyribbit.Viewer(scene, auto_start=False)
+>>> def update(dt):
+...     pose = scene.get_pose(mesh_node).copy()
+...     pose[0, 3] += 0.3 * dt
+...     scene.set_pose(mesh_node, pose)
+>>> clock.schedule_interval(update, 1.0 / 30.0)
+>>> try:
+...     v.start()
+... finally:
+...     clock.unschedule(update)
+
+Creating the viewer or calling ``start()`` from a background thread on
+macOS raises ``RuntimeError`` before window initialization.
+
 Running the Viewer in a Separate Thread
 ---------------------------------------
-If you'd like to animate your models, you'll want to run the viewer in a
-separate thread so that you can update the scene while the viewer is running.
+On Linux and Windows, you can also run the viewer in a separate thread so
+that you can update the scene while the viewer is running.
 To do this, first pop the viewer in a separate thread by calling its constructor
 with the ``run_in_thread`` option set:
 

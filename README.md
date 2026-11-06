@@ -90,3 +90,13 @@ The available keyboard commands are as follows:
 As a note, displaying shadows significantly slows down rendering, so if you're
 experiencing low framerates, just kill shadows or reduce the number of lights in
 your scene.
+
+## Releasing
+
+Update `pyribbit/version.py` to a new version and push the change to `master`
+(or merge a pull request containing that change). GitHub Actions runs the
+non-rendering tests, builds and validates the wheel and source distribution,
+and publishes them to PyPI. Versions already present on PyPI are skipped.
+
+The repository needs an Actions secret named `PYPI_API_TOKEN`, containing a
+PyPI API token scoped to the `pyribbit` project. No release tag is required.

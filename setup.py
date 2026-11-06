@@ -51,6 +51,7 @@ setup(
     description="Easy-to-use Python renderer for 3D visualization",
     long_description="A simple implementation of Physically-Based Rendering "
     "(PBR) in Python. Compliant with the glTF 2.0 standard.",
+    long_description_content_type="text/plain",
     author="Adam Fishman",
     author_email="hello@fishbotics.com",
     license="MIT License",
